@@ -1,10 +1,11 @@
 name: Update Kaggle Sensor Dataset
 
-on:
-  # Permite ejecutarlo manualmente desde la pestaña Actions
-  workflow_dispatch:
+permissions:
+  contents: write
+  releases: write
 
-  # Ejecución automática (opcional): todos los días a las 02:00 UTC
+on:
+  workflow_dispatch:
   schedule:
     - cron: "0 2 * * *"
 
@@ -13,39 +14,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Descargar el repositorio
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Preparar Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      # 3. Instalar la CLI de Kaggle
       - name: Install Kaggle CLI
         run: |
           pip install kaggle
 
-      # 4. Configurar credenciales de Kaggle (desde Secrets)
       - name: Configure Kaggle credentials
         run: |
           mkdir -p ~/.kaggle
           echo "{\"username\":\"${{ secrets.KAGGLE_USERNAME }}\",\"key\":\"${{ secrets.KAGGLE_KEY }}\"}" > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
-      # 5. Descargar el dataset desde Kaggle
       - name: Download dataset from Kaggle
         run: |
           kaggle datasets download -d garystafford/environmental-sensor-data-132k
 
-      # 6. Descomprimir el ZIP
       - name: Unzip dataset
         run: |
           unzip -o environmental-sensor-data-132k.zip
 
-      # 7. Subir el CSV al GitHub Release (manteniendo la misma URL)
       - name: Upload CSV to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
